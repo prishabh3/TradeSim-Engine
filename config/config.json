@@ -1,0 +1,45 @@
+{
+    "market_data": {
+        "mode": "simulation",
+        "api_url": "https://www.alphavantage.co/query",
+        "api_key": "YOUR_ALPHA_VANTAGE_KEY",
+        "poll_interval_ms": 500,
+        "symbols": ["AAPL", "GOOGL", "TSLA", "MSFT", "AMZN"]
+    },
+    "indicators": {
+        "sma_period": 14,
+        "ema_period": 14,
+        "rsi_period": 14
+    },
+    "risk": {
+        "max_position_usd": 10000.0,
+        "max_total_exposure_usd": 50000.0,
+        "max_loss_per_trade_usd": 500.0,
+        "stop_loss_pct": 0.02
+    },
+    "strategy": {
+        "rsi_oversold_threshold": 30.0,
+        "rsi_overbought_threshold": 70.0,
+        "order_quantity": 10.0,
+        "enabled": true
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "trading.log"
+    },
+    "simulation": {
+        "initial_prices": {
+            "AAPL":  175.0,
+            "GOOGL": 140.0,
+            "TSLA":  250.0,
+            "MSFT":  380.0,
+            "AMZN":  185.0
+        },
+        "volatility": 0.002,
+        "initial_cash": 100000.0
+    },
+    "display": {
+        "refresh_interval_ms": 500,
+        "max_recent_trades": 10
+    }
+}

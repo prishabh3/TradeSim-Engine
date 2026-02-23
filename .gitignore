@@ -1,0 +1,15 @@
+build/
+*.o
+*.a
+*.so
+*.dylib
+trading_system
+*.log
+.DS_Store
+.vscode/
+.idea/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+INTERVIEW_PREP.md

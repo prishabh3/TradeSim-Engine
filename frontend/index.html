@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TradeSim — Real-Time Trading Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ── Top Bar ─────────────────────────────────────────────────────────── -->
+    <header class="topbar">
+        <div class="topbar__left">
+            <div class="topbar__brand">TRADESIM</div>
+            <div class="topbar__divider"></div>
+            <span class="topbar__pill" id="conn-pill">● CONNECTING</span>
+        </div>
+        <div class="topbar__center">
+            <div class="topbar__metric">
+                <span class="metric__label">NAV</span>
+                <span class="metric__value" id="v-nav">—</span>
+            </div>
+            <div class="topbar__metric">
+                <span class="metric__label">CASH</span>
+                <span class="metric__value" id="v-cash">—</span>
+            </div>
+            <div class="topbar__metric">
+                <span class="metric__label">TOTAL P&amp;L</span>
+                <span class="metric__value" id="v-pnl">—</span>
+            </div>
+            <div class="topbar__metric">
+                <span class="metric__label">UNREAL P&amp;L</span>
+                <span class="metric__value" id="v-upnl">—</span>
+            </div>
+        </div>
+        <div class="topbar__right">
+            <span class="topbar__time" id="clock">—</span>
+        </div>
+    </header>
+
+    <!-- ── Main Layout ────────────────────────────────────────────────────── -->
+    <div class="layout">
+
+        <!-- LEFT COLUMN -->
+        <aside class="col col--left">
+
+            <!-- Order Entry Panel -->
+            <section class="panel">
+                <div class="panel__head">
+                    <span class="panel__title">ORDER ENTRY</span>
+                </div>
+                <div class="order-form">
+                    <div class="order-form__tabs">
+                        <button class="otab otab--buy active" id="tab-buy" onclick="setOrderSide('BUY')">BUY</button>
+                        <button class="otab otab--sell" id="tab-sell" onclick="setOrderSide('SELL')">SELL</button>
+                    </div>
+                    <div class="form-grid">
+                        <label class="field">
+                            <span class="field__label">SYMBOL</span>
+                            <select class="field__input" id="o-symbol"></select>
+                        </label>
+                        <label class="field">
+                            <span class="field__label">TYPE</span>
+                            <select class="field__input" id="o-type" onchange="onTypeChange()">
+                                <option value="LIMIT">LIMIT</option>
+                                <option value="MARKET">MARKET</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="field__label">QUANTITY</span>
+                            <input class="field__input" id="o-qty" type="number" value="10" min="1" step="1" />
+                        </label>
+                        <label class="field" id="price-field">
+                            <span class="field__label">PRICE</span>
+                            <input class="field__input" id="o-price" type="number" value="" step="0.01"
+                                placeholder="0.00" />
+                        </label>
+                    </div>
+                    <div class="order-form__preview" id="order-preview">
+                        LIMIT BUY · 10 units
+                    </div>
+                    <button class="submit-btn submit-btn--buy" id="submit-btn" onclick="placeOrder()">
+                        PLACE BUY ORDER
+                    </button>
+                    <div class="order-msg" id="order-msg"></div>
+                </div>
+            </section>
+
+            <!-- Order Book -->
+            <section class="panel">
+                <div class="panel__head">
+                    <span class="panel__title">ORDER BOOK</span>
+                    <select class="panel__select" id="book-sym"></select>
+                </div>
+                <div class="book">
+                    <div class="book__header">
+                        <span>PRICE</span><span>SIZE</span><span>TOTAL</span>
+                    </div>
+                    <div id="asks-container" class="book__side book__side--ask"></div>
+                    <div class="book__mid">
+                        <span id="mid-price">—</span>
+                        <span class="book__spread" id="book-spread-val">SPREAD —</span>
+                    </div>
+                    <div id="bids-container" class="book__side book__side--bid"></div>
+                </div>
+            </section>
+
+        </aside>
+
+        <!-- CENTER COLUMN -->
+        <main class="col col--center">
+
+            <!-- Chart -->
+            <section class="panel panel--chart">
+                <div class="panel__head">
+                    <div class="sym-tabs" id="sym-tabs"></div>
+                    <div class="chart-meta">
+                        <span class="chart-price" id="chart-price">—</span>
+                        <span class="chart-chg" id="chart-chg"></span>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Indicators -->
+            <section class="panel">
+                <div class="panel__head"><span class="panel__title">TECHNICAL INDICATORS</span></div>
+                <table class="data-table" id="ind-table">
+                    <thead>
+                        <tr>
+                            <th>SYMBOL</th>
+                            <th>LAST</th>
+                            <th>SMA</th>
+                            <th>EMA</th>
+                            <th>RSI</th>
+                            <th>SIGNAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ind-body"></tbody>
+                </table>
+            </section>
+
+        </main>
+
+        <!-- RIGHT COLUMN -->
+        <aside class="col col--right">
+
+            <!-- Positions -->
+            <section class="panel">
+                <div class="panel__head"><span class="panel__title">POSITIONS</span></div>
+                <table class="data-table" id="pos-table">
+                    <thead>
+                        <tr>
+                            <th>SYM</th>
+                            <th>QTY</th>
+                            <th>AVG</th>
+                            <th>UNREAL</th>
+                            <th>REAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pos-body">
+                        <tr>
+                            <td colspan="5" class="empty">NO POSITIONS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Recent Trades -->
+            <section class="panel panel--trades">
+                <div class="panel__head"><span class="panel__title">RECENT FILLS</span></div>
+                <div id="trades-list" class="trades-list">
+                    <div class="empty">NO FILLS YET</div>
+                </div>
+            </section>
+
+        </aside>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
